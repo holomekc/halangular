@@ -32,7 +32,7 @@ export class Link {
    * Its value SHOULD be considered false if it is undefined or any other
    * value than true.
    */
-  private templated?: boolean = false;
+  private templated = false;
 
   /**
    * The "type" property is OPTIONAL.
@@ -106,5 +106,80 @@ export class Link {
    */
   public hasRel(rel: string): boolean {
     return this.rel === rel;
+  }
+
+  public getHref(): string {
+    return this.href;
+  }
+
+  public isTemplated(): boolean {
+    return this.templated;
+  }
+
+  public getType(): string {
+    return this.type;
+  }
+
+  public getDeprecation(): string {
+    return this.deprecation;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public getProfile(): string {
+    return this.profile;
+  }
+
+  public getTitle(): string {
+    return this.profile;
+  }
+
+  public getHreflang(): string {
+    return this.hreflang;
+  }
+
+  public getTemplatedHref(params: Map<string, any>): string {
+    let url = this.href;
+    url = this.replaceRequiredParameters(params, url);
+    url = this.replaceOptionalParameters(url, params);
+    return url;
+  }
+
+  private replaceRequiredParameters(params: Map<string, any>, url) {
+    // first replace required parameters and path params
+    params.forEach((value, key) => {
+      url = url.replace(`{${key}}`, value);
+    });
+    return url;
+  }
+
+  private replaceOptionalParameters(url, params: Map<string, any>) {
+    const templatedParams = /{([&?])(.*?)}/g;
+    // search for optional params and replace them if they are defined
+    let matcher;
+    do {
+      matcher = templatedParams.exec(url);
+      if (matcher) {
+        const sign = matcher[1];
+        const templates: string[] = (matcher[2] as string).split(',');
+
+        url = url.replace(templatedParams, '');
+
+        templates.forEach((rawTemplate, index) => {
+          const template = rawTemplate.trim();
+
+          if (params.get(template)) {
+            if (index === 0 && sign === '?') {
+              url += `?${template}=${params.get(template)}`;
+            } else {
+              url += `&${template}=${params.get(template)}`;
+            }
+          }
+        });
+      }
+    } while (matcher);
+    return url;
   }
 }

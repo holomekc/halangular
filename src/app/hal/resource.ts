@@ -45,10 +45,30 @@ export abstract class Resource {
     return this._links.get(rel);
   }
 
+  public getSingleLink(rel: string, index?: number): Link {
+    if (isArray(this._links)) {
+      if (index) {
+        return (this.getLink(rel) as Link[])[index];
+      } else {
+        return (this.getLink(rel) as Link[])[0];
+      }
+    } else {
+      return this.getLink(rel) as Link;
+    }
+  }
+
+  public getArrayLink(rel: string): Link[] {
+    if (isArray(this._links)) {
+      return this.getLink(rel) as Link[];
+    } else {
+      const result: Link[] = [];
+      result.push(this.getLink(rel) as Link);
+      return result;
+    }
+  }
+
   public hasLink(rel: string): boolean {
     return this._links.has(rel);
   }
 
-
 }
-

@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {HalService} from './hal/hal.service';
 import {Menu} from './example/menu';
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'hal-root',
@@ -8,19 +9,32 @@ import {Menu} from './example/menu';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'halangular';
 
+  public static ENTRY = 'ENTRY';
 
-  constructor(private halService: HalService) {
+  hasGenerateToken: boolean;
+
+  constructor(private halService: HalService, private httpClient: HttpClient) {
   }
 
   ngOnInit(): void {
-    this.halService.entryPoint('/api/menu', Menu).subscribe(value => {
-      console.log(value);
-      console.log(value.hasLink('generateToken'));
-      value.getLink('generateToken');
-    });
+    this.halService.storeEntryPoint(this.httpClient.get<Menu>('/api/menu', {
+      headers: {
+        'Accept': 'application/hal+json'
+      }
+    }), Menu, AppComponent.ENTRY)
+      .subscribe(value => {
+        // console.log(value);
+        // console.log(value.hasLink('generateToken'));
+        this.hasGenerateToken = value.hasLink('generateToken');
+      });
   }
+
+  request() {
+    this.ngOnInit();
+  }
+
+
 }
 
 
