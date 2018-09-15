@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {HalService} from '../hal/hal.service';
-import {HttpClient} from '@angular/common/http';
 import {Subject} from 'rxjs';
 import {HalMethod} from '../hal/hal-method';
 import {Menu} from '../example/menu';
@@ -15,7 +14,7 @@ export class FollowComponent implements OnInit, OnDestroy {
 
   private ngUnsubscribe = new Subject();
 
-  constructor(private halService: HalService, private httpClient: HttpClient) {
+  constructor(private halService: HalService) {
   }
 
   ngOnInit() {
@@ -30,30 +29,6 @@ export class FollowComponent implements OnInit, OnDestroy {
         });
       }
     });
-
-
-    // this.halService.getResourceFromStorage<Menu>(AppComponent.ENTRY).pipe(takeUntil(this.ngUnsubscribe)).subscribe(value => {
-    //   const link = value.getSingleLink('generateToken');
-    //
-    //   link.isTemplated();
-    //   console.log(link);
-    //
-    //   const map = new Map<string, any>();
-    //   map.set('vin', '00000000000000000');
-    //   map.set('path', 'valueForPath');
-    //   map.set('type', 'typeValue');
-    //   map.set('limit', 2);
-    //
-    //   // const map2 = new Map<string, any>([['vin', '00000000000000000'], ['path', 'valueForPath'], ['type', 'typeValue'], ['limit', 2]]);
-    //
-    //   const url = link.getTemplatedHref(map);
-    //
-    //   this.httpClient.get(url).subscribe(value1 => {
-    //     console.log(value1);
-    //   });
-    //
-    //   console.log(url);
-    // });
   }
 
   ngOnDestroy(): void {
