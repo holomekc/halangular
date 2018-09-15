@@ -18,65 +18,28 @@ export class HalService {
     return map((value: T) => {
       const newType = new type();
       newType.deserialize(value);
+      console.log(newType);
       return newType;
     });
   }
 
-  constructor(private halHttpAdapter: HalHttpAdapter) {
-  }
-
-  public entryPoint<T extends Resource>(url: string, method: HalMethod, type: { new(): T }, body?: any,
-                                        options?: HalHttpOptions): Observable<T> {
-    return this.follow(new Link('entryPoint', url, false), method, type, body, options);
-  }
-
-  public entryPointAndRemember<T extends Resource>(url: string, method: HalMethod, type: { new(): T }, body?: any,
-                                                   options?: HalHttpOptions): Observable<T> {
-    return this.followAndRemember(new Link('entryPoint', url, false), method, type, body, options);
-  }
-
-  public follow<T extends Resource>(link: Link, method: HalMethod, type: { new(): T }, body?: any,
-                                    options?: HalHttpOptions): Observable<T> {
-
-    const storageValue = this.storage.get(link.getHref());
-
-    if (storageValue) {
-      return storageValue;
+  private static replacePathParams(url: string, options: HalHttpOptions) {
+    if (!options || !options.params) {
+      return url;
     }
 
-    let url = link.getHref();
-    if (link.isTemplated()) {
-      url = this.removeTemplates(url, options);
-      url = this.checkMissingRequirements(url);
+    for (const key in options.params) {
+      if (options.params.hasOwnProperty(key)) {
+        // remove required
+        const regex = new RegExp('/{' + key + '}');
+        url = url.replace(regex, '/' + options.params[key] as string);
+      }
     }
 
-    switch (method) {
-      case HalMethod.DELETE:
-        return this.halHttpAdapter.delete<T>(url, options).pipe(HalService.deserialize(type));
-      case HalMethod.GET:
-        return this.halHttpAdapter.get<T>(url, options).pipe(HalService.deserialize(type));
-      case HalMethod.HEAD:
-        return this.halHttpAdapter.head<T>(url, options).pipe(HalService.deserialize(type));
-      case HalMethod.OPTIONS:
-        return this.halHttpAdapter.options<T>(url, options).pipe(HalService.deserialize(type));
-      case HalMethod.PATCH:
-        return this.halHttpAdapter.patch<T>(url, body, options).pipe(HalService.deserialize(type));
-      case HalMethod.POST:
-        return this.halHttpAdapter.post<T>(url, body, options).pipe(HalService.deserialize(type));
-      case HalMethod.PUT:
-        return this.halHttpAdapter.put<T>(url, body, options).pipe(HalService.deserialize(type));
-    }
+    return url;
   }
 
-  public followAndRemember<T extends Resource>(link: Link, method: HalMethod, type: { new(): T }, body?: any, options?: HalHttpOptions) {
-    const observable = this.follow(link, method, type, body, options).pipe(share());
-    observable.subscribe(value => {
-      this.storage.set(link.getHref(), of(value));
-    });
-    return observable;
-  }
-
-  private removeTemplates(url: string, options: HalHttpOptions): string {
+  private static removeTemplates(url: string, options: HalHttpOptions): string {
     if (!options || !options.params) {
       return url;
     }
@@ -103,7 +66,7 @@ export class HalService {
     return url;
   }
 
-  private checkMissingRequirements(url: string): string {
+  private static checkMissingRequirements(url: string): string {
     const requiredParams = /{.*?}/;
     const reResult = requiredParams.exec(url);
     if (reResult) {
@@ -113,5 +76,60 @@ export class HalService {
     } else {
       return url.replace('\?', '');
     }
+  }
+
+  constructor(private halHttpAdapter: HalHttpAdapter) {
+  }
+
+  public entryPoint<T extends Resource>(url: string, method: HalMethod, type: { new(): T }, body?: any,
+                                        options?: HalHttpOptions): Observable<T> {
+    return this.follow(new Link('entryPoint', url, false), method, type, body, options);
+  }
+
+  public entryPointAndRemember<T extends Resource>(url: string, method: HalMethod, type: { new(): T }, body?: any,
+                                                   options?: HalHttpOptions): Observable<T> {
+    return this.followAndRemember(new Link('entryPoint', url, false), method, type, body, options);
+  }
+
+  public follow<T extends Resource>(link: Link, method: HalMethod, type: { new(): T }, body?: any,
+                                    options?: HalHttpOptions): Observable<T> {
+
+    const storageValue = this.storage.get(link.getHref());
+
+    if (storageValue) {
+      return storageValue;
+    }
+
+    let url = link.getHref();
+    if (link.isTemplated()) {
+      url = HalService.replacePathParams(url, options);
+      url = HalService.removeTemplates(url, options);
+      url = HalService.checkMissingRequirements(url);
+    }
+
+    switch (method) {
+      case HalMethod.DELETE:
+        return this.halHttpAdapter.delete<T>(url, options).pipe(HalService.deserialize(type));
+      case HalMethod.GET:
+        return this.halHttpAdapter.get<T>(url, options).pipe(HalService.deserialize(type));
+      case HalMethod.HEAD:
+        return this.halHttpAdapter.head<T>(url, options).pipe(HalService.deserialize(type));
+      case HalMethod.OPTIONS:
+        return this.halHttpAdapter.options<T>(url, options).pipe(HalService.deserialize(type));
+      case HalMethod.PATCH:
+        return this.halHttpAdapter.patch<T>(url, body, options).pipe(HalService.deserialize(type));
+      case HalMethod.POST:
+        return this.halHttpAdapter.post<T>(url, body, options).pipe(HalService.deserialize(type));
+      case HalMethod.PUT:
+        return this.halHttpAdapter.put<T>(url, body, options).pipe(HalService.deserialize(type));
+    }
+  }
+
+  public followAndRemember<T extends Resource>(link: Link, method: HalMethod, type: { new(): T }, body?: any, options?: HalHttpOptions) {
+    const observable = this.follow(link, method, type, body, options).pipe(share());
+    observable.subscribe(value => {
+      this.storage.set(link.getHref(), of(value));
+    });
+    return observable;
   }
 }
