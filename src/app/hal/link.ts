@@ -32,7 +32,7 @@ export class Link {
    * Its value SHOULD be considered false if it is undefined or any other
    * value than true.
    */
-  private templated = false;
+  private templated: boolean;
 
   /**
    * The "type" property is OPTIONAL.
@@ -90,14 +90,37 @@ export class Link {
   private hreflang?: string = null;
 
 
-  public deserialize(rel: string, instanceData: Link): void {
+  constructor(rel: string, href: string, templated?: boolean, type?: string,
+              deprecation?: string, name?: string, profile?: string, title?: string, hreflang?: string) {
     this.rel = rel;
-    const keys = Object.keys(this);
-    for (const key of keys) {
-      if (instanceData.hasOwnProperty(key)) {
-        this[key] = instanceData[key];
-      }
+    this.href = href;
+    this.templated = templated;
+    if (!templated) {
+      this.templated = false;
     }
+    this.type = type;
+    this.deprecation = deprecation;
+    this.name = name;
+    this.profile = profile;
+    this.title = title;
+    this.hreflang = hreflang;
+  }
+
+  public static deserialize(rel: string, instanceData: Link): Link {
+
+    const href = instanceData.href;
+    let templated = instanceData.templated;
+    if (!templated) {
+      templated = false;
+    }
+    const type = instanceData.type;
+    const deprecation = instanceData.deprecation;
+    const name = instanceData.name;
+    const profile = instanceData.profile;
+    const title = instanceData.title;
+    const hreflang = instanceData.hreflang;
+
+    return new Link(rel, href, templated, type, deprecation, name, profile, title, hreflang);
   }
 
   /**
@@ -138,48 +161,5 @@ export class Link {
 
   public getHreflang(): string {
     return this.hreflang;
-  }
-
-  public getTemplatedHref(params: Map<string, any>): string {
-    let url = this.href;
-    url = this.replaceRequiredParameters(params, url);
-    url = this.replaceOptionalParameters(url, params);
-    return url;
-  }
-
-  private replaceRequiredParameters(params: Map<string, any>, url) {
-    // first replace required parameters and path params
-    params.forEach((value, key) => {
-      url = url.replace(`{${key}}`, value);
-    });
-    return url;
-  }
-
-  private replaceOptionalParameters(url, params: Map<string, any>) {
-    const templatedParams = /{([&?])(.*?)}/g;
-    // search for optional params and replace them if they are defined
-    let matcher;
-    do {
-      matcher = templatedParams.exec(url);
-      if (matcher) {
-        const sign = matcher[1];
-        const templates: string[] = (matcher[2] as string).split(',');
-
-        url = url.replace(templatedParams, '');
-
-        templates.forEach((rawTemplate, index) => {
-          const template = rawTemplate.trim();
-
-          if (params.get(template)) {
-            if (index === 0 && sign === '?') {
-              url += `?${template}=${params.get(template)}`;
-            } else {
-              url += `&${template}=${params.get(template)}`;
-            }
-          }
-        });
-      }
-    } while (matcher);
-    return url;
   }
 }

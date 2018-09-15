@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {HalService} from '../hal/hal.service';
-import {AppComponent} from '../app.component';
-import {Menu} from '../example/menu';
 import {HttpClient} from '@angular/common/http';
-import {takeUntil} from 'rxjs/operators';
 import {Subject} from 'rxjs';
+import {HalMethod} from '../hal/hal-method';
+import {Menu} from '../example/menu';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'hal-follow',
@@ -19,28 +19,41 @@ export class FollowComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.halService.getResourceFromStorage<Menu>(AppComponent.ENTRY).pipe(takeUntil(this.ngUnsubscribe)).subscribe(value => {
-      const link = value.getSingleLink('generateToken');
+    this.halService.entryPoint('/api/menu', HalMethod.GET, Menu)
+      .pipe(takeUntil(this.ngUnsubscribe)).subscribe(value => {
+      console.log(value);
 
-      link.isTemplated();
-      console.log(link);
-
-      const map = new Map<string, any>();
-      map.set('vin', '00000000000000000');
-      map.set('path', 'valueForPath');
-      map.set('type', 'typeValue');
-      map.set('limit', 2);
-
-      // const map2 = new Map<string, any>([['vin', '00000000000000000'], ['path', 'valueForPath'], ['type', 'typeValue'], ['limit', 2]]);
-
-      const url = link.getTemplatedHref(map);
-
-      this.httpClient.get(url).subscribe(value1 => {
-        console.log(value1);
-      });
-
-      console.log(url);
+      if (value.hasLink('generateToken')) {
+        this.halService.follow(value.getSingleLink('generateToken'), HalMethod.GET, Menu, null,
+          {params: {vin: '12345'}}).subscribe(value1 => {
+          console.log(value1);
+        });
+      }
     });
+
+
+    // this.halService.getResourceFromStorage<Menu>(AppComponent.ENTRY).pipe(takeUntil(this.ngUnsubscribe)).subscribe(value => {
+    //   const link = value.getSingleLink('generateToken');
+    //
+    //   link.isTemplated();
+    //   console.log(link);
+    //
+    //   const map = new Map<string, any>();
+    //   map.set('vin', '00000000000000000');
+    //   map.set('path', 'valueForPath');
+    //   map.set('type', 'typeValue');
+    //   map.set('limit', 2);
+    //
+    //   // const map2 = new Map<string, any>([['vin', '00000000000000000'], ['path', 'valueForPath'], ['type', 'typeValue'], ['limit', 2]]);
+    //
+    //   const url = link.getTemplatedHref(map);
+    //
+    //   this.httpClient.get(url).subscribe(value1 => {
+    //     console.log(value1);
+    //   });
+    //
+    //   console.log(url);
+    // });
   }
 
   ngOnDestroy(): void {

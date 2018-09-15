@@ -26,15 +26,17 @@ export abstract class Resource {
         if (isArray(value)) {
           const linkArray: Link[] = [];
           (value as Link[]).forEach((link: Link) => {
-            const newLink = new Link();
-            newLink.deserialize(key, link);
-            linkArray.push(newLink);
+            // const newLink = new Link();
+            // newLink.deserialize(key, link);
+            // linkArray.push(newLink);
+            linkArray.push(Link.deserialize(key, link));
             result.set(key, linkArray);
           });
         } else {
-          const newLink = new Link();
-          newLink.deserialize(key, (value as Link));
-          result.set(key, newLink);
+          // const newLink = new Link();
+          // newLink.deserialize(key, (value as Link));
+          // result.set(key, newLink);
+          result.set(key, Link.deserialize(key, (value as Link)));
         }
       }
     }
