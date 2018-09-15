@@ -7,11 +7,11 @@ export * from './link';
 export * from './hal.service';
 
 @NgModule({
-  imports: [
-    CommonModule
-  ],
-  declarations: [],
-  providers: [HalService]
+    imports: [
+        CommonModule
+    ],
+    declarations: [],
+    providers: [HalService]
 })
 export class HalModule {
 }

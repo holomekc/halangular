@@ -1,3 +1,3 @@
 export enum HalMethod {
-  DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+    DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 }
