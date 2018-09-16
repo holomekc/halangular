@@ -25,12 +25,7 @@ export class DefaultHalHttpAdapter extends HalHttpAdapter {
     }
 
 
-    delete<T>(url: string, options?: HalHttpOptions): Observable<T> {
-        options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.delete<T>(url, this.toHttpClientOptions(options));
-    }
-
-    private toHttpClientOptions(options: HalHttpOptions): {
+    private static toHttpClientOptions(options: HalHttpOptions): {
         headers?: HttpHeaders | {
             [header: string]: string | string[];
         };
@@ -45,34 +40,39 @@ export class DefaultHalHttpAdapter extends HalHttpAdapter {
         return options;
     }
 
+    delete<T>(url: string, options?: HalHttpOptions): Observable<T> {
+        options = DefaultHalHttpAdapter.addDefaultHeaders(options);
+        return this.httpClient.delete<T>(url, DefaultHalHttpAdapter.toHttpClientOptions(options));
+    }
+
     get<T>(url: string, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.get<T>(url, this.toHttpClientOptions(options));
+        return this.httpClient.get<T>(url, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
     head<T>(url: string, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.head<T>(url, this.toHttpClientOptions(options));
+        return this.httpClient.head<T>(url, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
     options<T>(url: string, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.options<T>(url, this.toHttpClientOptions(options));
+        return this.httpClient.options<T>(url, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
     patch<T>(url: string, body: any | null, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.patch<T>(url, body, this.toHttpClientOptions(options));
+        return this.httpClient.patch<T>(url, body, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
     post<T>(url: string, body: any | null, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.post<T>(url, body, this.toHttpClientOptions(options));
+        return this.httpClient.post<T>(url, body, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
     put<T>(url: string, body: any | null, options?: HalHttpOptions): Observable<T> {
         options = DefaultHalHttpAdapter.addDefaultHeaders(options);
-        return this.httpClient.put<T>(url, body, this.toHttpClientOptions(options));
+        return this.httpClient.put<T>(url, body, DefaultHalHttpAdapter.toHttpClientOptions(options));
     }
 
 }

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Resource} from './resource';
-import {Observable} from 'rxjs';
-import {map, publishReplay, refCount} from 'rxjs/operators';
+import {Observable, Subject} from 'rxjs';
+import {map, publishReplay, refCount, takeUntil} from 'rxjs/operators';
 import {HalHttpAdapter} from './hal-http-adapter';
 import {Link} from './link';
 import {HalMethod} from './hal-method';
@@ -11,6 +11,8 @@ import {HalHttpOptions} from './hal-http-options';
     providedIn: 'root'
 })
 export class HalService {
+
+    private cacheClearSubject = new Subject<boolean>();
 
     private static storage: Map<string, Observable<any>> = new Map<string, Observable<any>>();
 
@@ -81,6 +83,14 @@ export class HalService {
     constructor(private halHttpAdapter: HalHttpAdapter) {
     }
 
+    public clearCache() {
+        HalService.storage.clear();
+        const temp = this.cacheClearSubject;
+        this.cacheClearSubject = new Subject<boolean>();
+        temp.next(true);
+        temp.complete();
+    }
+
     public entryPoint<T extends Resource>(url: string, method: HalMethod, type: { new(): T }, body?: any,
                                           options?: HalHttpOptions): Observable<T> {
         return this.follow(new Link('entryPoint', url, false), method, type, body, options);
@@ -128,7 +138,7 @@ export class HalService {
     public followAndRemember<T extends Resource>(link: Link, method: HalMethod, type: { new(): T }, body?: any, options?: HalHttpOptions) {
         const observable = this.follow(link, method, type, body, options);
 
-        const result = observable.pipe(publishReplay(1), refCount());
+        const result = observable.pipe(takeUntil(this.cacheClearSubject), publishReplay(1), refCount());
         HalService.storage.set(link.getHref(), result);
         return result;
     }

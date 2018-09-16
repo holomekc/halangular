@@ -9,11 +9,23 @@ export abstract class Resource {
 
     public deserialize<T extends Resource>(instanceData: T): void {
 
+        this.deserializeData(instanceData);
+
         this._links = this.deserializeLink(instanceData['_links'] as Map<string, Link | Link[]>);
         this._embedded = this.deserializeResource(instanceData['_embedded'] as Map<string, Resource | Resource[]>);
     }
 
     public abstract getEmbeddedTypes(): Map<string, { new(): Resource }>;
+
+    private deserializeData<T extends Resource>(instance: T) {
+        const keys = Object.keys(instance);
+
+        for (const key of keys) {
+            if (instance.hasOwnProperty(key) && key != '_links' && key != 'embedded') {
+                this[key] = instance[key];
+            }
+        }
+    }
 
     private deserializeLink(instance: Map<string, Link | Link[]>) {
         const result: Map<string, Link | Link[]> = new Map<string, Link | Link[]>();
