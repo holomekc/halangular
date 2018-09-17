@@ -1,10 +1,10 @@
 export class Link {
 
-    public static readonly REL_SELF: 'self';
-    public static readonly REL_FIRST: 'first';
-    public static readonly REL_PREVIOUS: 'prev';
-    public static readonly REL_NEXT: 'next';
-    public static readonly REL_LAST: 'last';
+    public static readonly REL_SELF = 'self';
+    public static readonly REL_FIRST = 'first';
+    public static readonly REL_PREVIOUS = 'prev';
+    public static readonly REL_NEXT = 'next';
+    public static readonly REL_LAST = 'last';
 
 
     /**

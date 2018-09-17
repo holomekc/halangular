@@ -1,42 +1,30 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {HalService} from './hal/hal.service';
-import {HalMethod} from './hal/hal-method';
-import {Menu} from './example/menu';
-import {Subject} from 'rxjs';
-import {takeUntil} from 'rxjs/operators';
+import {Component, OnInit} from '@angular/core';
+import {HalMethod, HalService} from 'halangular';
+import {EntryPoint} from './model/entry-point';
+import {switchMap} from 'rxjs/operators';
+import {EMPTY} from 'rxjs';
 
 @Component({
-  selector: 'hal-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
-
-  hasGenerateToken: boolean;
-
-  private ngUnsubscribe = new Subject<boolean>();
-
-  constructor(private halService: HalService) {
-  }
-
-  ngOnInit(): void {
-
-    this.halService.entryPointAndRemember('/api/menu', HalMethod.GET, Menu)
-      .pipe(takeUntil(this.ngUnsubscribe)).subscribe(value => {
-      this.hasGenerateToken = value.hasLink('generateToken');
-    });
-  }
-
-  request() {
-    this.ngOnInit();
-  }
-
-  ngOnDestroy(): void {
-    this.ngUnsubscribe.next(true);
-    this.ngUnsubscribe.complete();
-  }
+export class AppComponent implements OnInit {
 
 
+    constructor(private halService: HalService){
+    }
+
+    ngOnInit(): void {
+        this.halService.entryPoint('', HalMethod.GET, EntryPoint).pipe(switchMap(value => {
+            if(value.hasLink('REL')){
+                // do something. e.g. follow link
+
+                // Instead of EntryPoint use suitable model
+                return this.halService.follow(value.getSingleLink('REL'),HalMethod.GET, EntryPoint);
+            }else{
+                return EMPTY;
+            }
+        }));
+    }
 }
-
-

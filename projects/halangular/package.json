@@ -1,0 +1,25 @@
+{
+  "name": "halangular",
+  "version": "0.0.1",
+  "description": "This Angular module allows to implement a HAL/JSON based http client.",
+  "keywords": [
+    "hal",
+    "angular"
+  ],
+  "bugs": {
+    "email": "holomekc.npm@gmail.com"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Christopher Holomek",
+    "email": "holomekc.npm@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holomekc/halangular.git"
+  },
+  "peerDependencies": {
+    "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
+    "@angular/core": "^6.0.0-rc.0 || ^6.0.0"
+  }
+}

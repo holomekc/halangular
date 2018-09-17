@@ -1,5 +1,4 @@
 import {Link} from './link';
-import {isArray} from 'util';
 
 export abstract class Resource {
 
@@ -41,7 +40,7 @@ export abstract class Resource {
             if (instance.hasOwnProperty(key)) {
                 const value = instance[key];
 
-                if (isArray(value)) {
+                if (Array.isArray(value)) {
                     const linkArray: Link[] = [];
                     (value as Link[]).forEach((link: Link) => {
                         linkArray.push(Link.deserialize(key, link));
@@ -70,7 +69,7 @@ export abstract class Resource {
                 const type = this.getEmbeddedTypes().get(key);
 
                 if (type) {
-                    if (isArray(value)) {
+                    if (Array.isArray(value)) {
                         const resourceArray: Resource[] = [];
                         (value as Resource[]).forEach((resource: Resource) => {
                             const newType = new type();
@@ -99,7 +98,7 @@ export abstract class Resource {
     }
 
     public getSingleLink(rel: string, index?: number): Link {
-        if (isArray(this._links)) {
+        if (Array.isArray(this._links)) {
             if (index) {
                 return (this.getLink(rel) as Link[])[index];
             } else {
@@ -111,7 +110,7 @@ export abstract class Resource {
     }
 
     public getArrayLink(rel: string): Link[] {
-        if (isArray(this._links)) {
+        if (Array.isArray(this._links)) {
             return this.getLink(rel) as Link[];
         } else {
             const result: Link[] = [];

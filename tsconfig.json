@@ -16,6 +16,14 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "paths": {
+      "halangular": [
+        "dist/halangular"
+      ],
+      "halangular/*": [
+        "dist/halangular/*"
+      ]
+    }
   }
 }

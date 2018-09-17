@@ -7,6 +7,7 @@ import {Link} from './link';
 import {HalMethod} from './hal-method';
 import {HalHttpOptions} from './hal-http-options';
 
+// @dynamic
 @Injectable({
     providedIn: 'root'
 })
@@ -17,6 +18,7 @@ export class HalService {
     private static storage: Map<string, Observable<any>> = new Map<string, Observable<any>>();
 
     private static deserialize<T extends Resource>(type: { new(): T }) {
+        // @dynamic
         return map((value: T) => {
             const newType = new type();
             newType.deserialize(value);
